@@ -2,11 +2,10 @@ package com.mwlazlowski.pointofsale.Devices.OutputDevices;
 
 public class LCDDisplay implements OutputDevice{
 
-    private static int defaultMaxTextLength =100;
     private int maxTextLength;
 
     public LCDDisplay() {
-        this.maxTextLength=defaultMaxTextLength;
+        this.maxTextLength = 100;
     }
 
     public LCDDisplay(int maxTextLength) {
@@ -22,6 +21,6 @@ public class LCDDisplay implements OutputDevice{
     }
 
     public int getMaxTextLength() {
-        return 0;
+        return maxTextLength;
     }
 }
