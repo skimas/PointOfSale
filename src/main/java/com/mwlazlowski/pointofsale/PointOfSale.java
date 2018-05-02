@@ -84,7 +84,7 @@ public class PointOfSale {
             shoppingCart.addProductToCart(product);
         }
     }
-
+    //function for tests or if confirmation is needed
     public boolean addProduct(String barCode){
         Product product = scanProductAndValidateOnLCD(barCode);
         if(product!=null){

@@ -6,19 +6,16 @@ public class Application {
 
     public static void main(String[] args){
 
+        //Example of using
         PointOfSale pointOfSale = new PointOfSale();
         pointOfSale.setupDatabase();
 
-        Product p1 = pointOfSale.scanProductAndValidateOnLCD("123456780");
-        pointOfSale.addProductToCart(p1);
-        Product p2 = pointOfSale.scanProductAndValidateOnLCD("123456781");
-        pointOfSale.addProductToCart(p2);
+        pointOfSale.addProductToCart("123456780");
+        pointOfSale.addProductToCart("123456781");
         //Product not found
-        Product p3 = pointOfSale.scanProductAndValidateOnLCD("123456784");
-        pointOfSale.addProductToCart(p3);
+        pointOfSale.addProductToCart("123456784");
         //Invalid bar-code
-        Product p4 = pointOfSale.scanProductAndValidateOnLCD("");
-        pointOfSale.addProductToCart(p4);
-        pointOfSale.scanProductAndValidateOnLCD("exit");
+        pointOfSale.addProductToCart("");
+        pointOfSale.addProductToCart("exit");
     }
 }
