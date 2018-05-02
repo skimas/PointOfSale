@@ -11,6 +11,7 @@ import com.mwlazlowski.pointofsale.Domain.Product;
 import com.mwlazlowski.pointofsale.Domain.ShoppingCart;
 
 import java.text.DecimalFormat;
+import java.util.List;
 
 public class PointOfSale {
 
@@ -26,22 +27,6 @@ public class PointOfSale {
         printer = new Printer();
         productsDatabase = new ProductDatabaseImpl();
         shoppingCart = new DefaultShoppingCart();
-    }
-
-    public PointOfSale(ProductsDatabase productsDatabase) {
-        barCodesScanner = new BarCodesScanner();
-        lcdDisplay = new LCDDisplay();
-        printer = new Printer();
-        this.productsDatabase = productsDatabase;
-        shoppingCart = new DefaultShoppingCart();
-    }
-
-    public PointOfSale(InputDevice barCodesScanner, OutputDevice lcdDisplay, OutputDevice printer, ProductsDatabase productsDatabase, ShoppingCart shoppingCart) {
-        this.barCodesScanner = barCodesScanner;
-        this.lcdDisplay = lcdDisplay;
-        this.printer = printer;
-        this.productsDatabase = productsDatabase;
-        this.shoppingCart = shoppingCart;
     }
 
     public void setupDatabase(){
@@ -93,46 +78,60 @@ public class PointOfSale {
         this.productsDatabase = productsDatabase;
     }
 
+    public void addProductToCart(String barCode){
+        Product product = scanProductAndValidateOnLCD(barCode);
+        if(product!=null){
+            shoppingCart.addProductToCart(product);
+        }
+    }
+
+    public boolean addProduct(String barCode){
+        Product product = scanProductAndValidateOnLCD(barCode);
+        if(product!=null){
+            shoppingCart.addProductToCart(product);
+            return true;
+        } else return false;
+    }
+
     public Product scanProductAndValidateOnLCD(String barCode){
         barCodesScanner.scan(barCode);
         Product product = productsDatabase.findByBarCode(barCodesScanner.getScannedCode());
         if(barCode.equals("exit")){
             printReceipt();
         } else if(barCode.equals("")){
-            lcdDisplay.print("Invalid bar-code");
+            lcdDisplay.print("Invalid bar-code\n");
         } else if(product==null){
-            lcdDisplay.print("Product not found");
+            lcdDisplay.print("Product not found\n");
         } else {
-            lcdDisplay.print(product.getName() + "\t\t" + product.getPrice() + "\n");
+            lcdDisplay.print(product.getName() + " " + product.getPrice() + "\n");
         }
         return product;
-    }
-
-    public void addProductToCart(Product product){
-        if(product!=null) shoppingCart.addProductToCart(product);
     }
 
     public void printReceipt(){
         StringBuilder receipt = new StringBuilder();
         String tmp;
-        int length;
-        for (Product product: shoppingCart.getListOfProducts()){
+        List<Product> listOfProducts = shoppingCart.getListOfProducts();
+        for (Product product: listOfProducts){
             tmp=product.getName() + product.getPrice();
-            length = printer.getMaxTextLength() - tmp.length();
-            receipt.append(product.getName());
-            for (int i = 0; i<length; ++i){
-                receipt.append(" ");
-            }
-            receipt.append(product.getPrice())
+            receipt.append(product.getName())
+                    .append(prepareSpaces(printer.getMaxTextLength() - tmp.length()))
+                    .append(product.getPrice())
                     .append("\n");
         }
-        receipt.append("Total:");
-        tmp=String.format("%.2f", shoppingCart.getTotalCost()) + "total:";
-        length=printer.getMaxTextLength()-tmp.length();
-        for (int i = 0; i<length; ++i){
-            receipt.append(" ");
-        }
-        receipt.append(String.format("%.2f", shoppingCart.getTotalCost()));
+        double totalCost = shoppingCart.getTotalCost();
+        tmp=String.format("%.2f", totalCost) + "total:";
+        receipt.append("Total:")
+                .append(prepareSpaces(printer.getMaxTextLength()-tmp.length()))
+                .append(String.format("%.2f", totalCost));
         printer.print(receipt.toString());
+    }
+
+    private String prepareSpaces(int length){
+        StringBuilder preparedSpaces = new StringBuilder();
+        for (int i = 0; i<length; ++i){
+            preparedSpaces.append(" ");
+        }
+        return preparedSpaces.toString();
     }
 }
